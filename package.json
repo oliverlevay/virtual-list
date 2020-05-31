@@ -12,7 +12,7 @@
     "react-scripts": "3.4.1",
     "styled-components": "^5.1.1"
   },
-  "homepage": "https://oliverlevay.github.io/virtual-list/build/",
+  "homepage": "https://oliverlevay.github.io/virtual-list/",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
