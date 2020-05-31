@@ -107,7 +107,11 @@ const App = () => {
   const [emailError, setEmailError] = useState("");
   const [lists, setLists] = useState(null);
 
-  
+  window.onload = async function () {
+    if (await api.GetIsAuthorized()) {
+      await loadLists();
+    }
+  };
 
   const login = async () => {
     console.log(username, password);
@@ -149,19 +153,17 @@ const App = () => {
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
-        setLists(response.message);
+      setLists(response.message);
 
-        console.log(lists);
+      console.log(lists);
+    } else {
+      alert("Fel när listor skulle laddas: " + response.message);
     }
-    else {
-        alert("Fel när listor skulle laddas: " + response.message);
-    }
-}
+  };
 
   const loggedInUpdater = () => {
     setLoggedIn(true);
     setLoggingIn(false);
-    loadLists();
   };
 
   const cleanUpForms = () => {
@@ -312,10 +314,13 @@ const App = () => {
             </Information>
           </div>
         )}
-        {loggedIn && lists.map((list) => (
-          <h1>{list}</h1>
-        ))
-      }
+        {loggedIn && (
+          <Information darkMode={darkMode}>
+            {lists.map((list) => (
+              <Button>{list.listname}</Button>
+            ))}
+          </Information>
+        )}
       </Content>
     </Body>
   );
