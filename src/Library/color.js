@@ -11,6 +11,8 @@ const color = (colorCode, dark = true) => {
         return "#596273";
       case "error":
         return "#ea0027";
+      case "text":
+        return "white";
       default:
         break;
     }
@@ -26,6 +28,8 @@ const color = (colorCode, dark = true) => {
         return "#ffffff";
       case "error":
         return "#ea0027";
+      case "text":
+        return "black";
       default:
         break;
     }

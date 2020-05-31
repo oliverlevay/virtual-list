@@ -31,11 +31,9 @@ const Information = styled.div`
   display: flex;
   flex-direction: column;
   background-color: ${(props) => color("background", props.darkMode)};
-  padding: 1em;
   margin: 1em 0;
-  min-width: 15em;
+  width: 16em;
   border-radius: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 `;
 
 const InputAndTextContainer = styled.div`
@@ -43,12 +41,13 @@ const InputAndTextContainer = styled.div`
 `;
 
 const Input = styled.input`
+  color: ${(props) => color("text", props.darkMode)};
   display: flex;
   border-width: 1px;
-  padding: 0.5em 0.25em;
-  width: 90%;
+  padding: 0.5em 0.25em 0.5em 0.25em;
   border-radius: 5px;
   font-size: 1em;
+  width: 100%;
   background-color: ${(props) => color("background2", props.darkMode)};
   ${({ failed }) =>
     failed &&
@@ -87,11 +86,6 @@ const Button = styled.button`
   }
 `;
 
-const RowContainer = styled.div`
-  display: flex;
-  justify-content: space-evenly;
-`;
-
 const ErrorMessage = styled.div`
   color: ${color("error")};
 `;
@@ -107,8 +101,10 @@ const App = () => {
   const [passwordFailed, setPasswordFailed] = useState(false);
   const [password2, setPassword2] = useState("");
   const [email, setEmail] = useState("");
+  const [emailFailed, setEmailFailed] = useState(false);
   const [api, setApi] = useState(new Api());
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const login = async () => {
     console.log(username, password);
@@ -133,7 +129,8 @@ const App = () => {
       setPassword2("");
     }
     if (!email.includes("@") || !email.includes(".")) {
-      alert("That doesn't look like a valid email address");
+      setEmailError("That doesn't look like a valid email address");
+      setEmailFailed(true);
       return;
     }
     var result = await api.CreateUser(email, username, username, password);
@@ -149,6 +146,14 @@ const App = () => {
   const loggedInUpdater = () => {
     setLoggedIn(true);
     setLoggingIn(false);
+  };
+
+  const cleanUpForms = () => {
+    setUsername("");
+    setPassword("");
+    setUsernameFailed(false);
+    setPasswordFailed(false);
+    setError("");
   };
 
   return (
@@ -210,24 +215,23 @@ const App = () => {
               <ErrorMessage>{error}</ErrorMessage>
             </Information>
             <Information darkMode={darkMode}>
-              <RowContainer>
-                <Button
-                  darkMode={darkMode}
-                  onClick={() => {
-                    setLoggingIn(false);
-                  }}
-                >
-                  back
-                </Button>
-                <Button
-                  darkMode={darkMode}
-                  onClick={() => {
-                    login();
-                  }}
-                >
-                  login
-                </Button>
-              </RowContainer>
+              <Button
+                darkMode={darkMode}
+                onClick={() => {
+                  setLoggingIn(false);
+                  cleanUpForms();
+                }}
+              >
+                back
+              </Button>
+              <Button
+                darkMode={darkMode}
+                onClick={() => {
+                  login();
+                }}
+              >
+                login
+              </Button>
             </Information>
           </div>
         )}
@@ -239,8 +243,10 @@ const App = () => {
                 <Input
                   darkMode={darkMode}
                   value={email}
+                  failed={emailFailed}
                   onChange={(event) => setEmail(event.target.value)}
                 ></Input>
+                <ErrorMessage>{emailError}</ErrorMessage>
               </InputAndTextContainer>
               <InputAndTextContainer>
                 <Text darkMode={darkMode}>username:</Text>
@@ -270,24 +276,22 @@ const App = () => {
               </InputAndTextContainer>
             </Information>
             <Information darkMode={darkMode}>
-              <RowContainer>
-                <Button
-                  darkMode={darkMode}
-                  onClick={() => {
-                    setRegistering(false);
-                  }}
-                >
-                  back
-                </Button>
-                <Button
-                  darkMode={darkMode}
-                  onClick={() => {
-                    register();
-                  }}
-                >
-                  register
-                </Button>
-              </RowContainer>
+              <Button
+                darkMode={darkMode}
+                onClick={() => {
+                  setRegistering(false);
+                }}
+              >
+                back
+              </Button>
+              <Button
+                darkMode={darkMode}
+                onClick={() => {
+                  register();
+                }}
+              >
+                register
+              </Button>
             </Information>
           </div>
         )}
