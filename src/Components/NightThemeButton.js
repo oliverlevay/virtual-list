@@ -4,7 +4,11 @@ import "./NightThemeButton.css";
 const NightThemeButton = ({ defaultChecked, onClick }) => {
   return (
     <label className="switch">
-      <input type="checkbox" defaultChecked={defaultChecked} onClick={onClick}></input>
+      <input
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        onClick={onClick}
+      ></input>
       <span className="slider round"></span>
     </label>
   );

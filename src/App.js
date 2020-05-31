@@ -4,6 +4,7 @@ import NightThemeButton from "./Components/NightThemeButton";
 import color from "./Library/color";
 import Api from "./Library/Api";
 import { setCookie } from "./Library/Cookies";
+import AddButtonIcon from "./Components/AddButton";
 
 const Body = styled.div`
   display: flex;
@@ -88,6 +89,12 @@ const Button = styled.button`
 
 const ErrorMessage = styled.div`
   color: ${color("error")};
+`;
+
+const AddButton = styled.button`
+  display: flex;
+  align-self: center;
+  padding: 0;
 `;
 
 const App = () => {
@@ -185,7 +192,6 @@ const App = () => {
           }}
         ></NightThemeButton>
       </NightThemeButtonContainer>
-
       <Content>
         {!loggingIn && !registering && !loggedIn && (
           <div>
@@ -218,6 +224,7 @@ const App = () => {
                   darkMode={darkMode}
                   value={username}
                   failed={usernameFailed}
+                  autoComplete="username"
                   onChange={(event) => setUsername(event.target.value)}
                 ></Input>
               </InputAndTextContainer>
@@ -228,6 +235,7 @@ const App = () => {
                   darkMode={darkMode}
                   value={password}
                   failed={passwordFailed}
+                  autoComplete="password"
                   onChange={(event) => setPassword(event.target.value)}
                 ></Input>
               </InputAndTextContainer>
@@ -244,6 +252,7 @@ const App = () => {
                 back
               </Button>
               <Button
+                type="submit"
                 darkMode={darkMode}
                 onClick={() => {
                   login();
@@ -316,6 +325,14 @@ const App = () => {
         )}
         {loggedIn && (
           <Information darkMode={darkMode}>
+            <AddButton>
+              <AddButtonIcon
+                width="60"
+                height="60"
+                color={color("primary", darkMode)}
+              ></AddButtonIcon>
+            </AddButton>
+
             {lists.map((list) => (
               <Button>{list.listname}</Button>
             ))}
