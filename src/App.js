@@ -31,23 +31,23 @@ const Information = styled.div`
   display: flex;
   flex-direction: column;
   background-color: ${(props) => color("background", props.darkMode)};
-  margin: 1em 0;
+  margin: 0.5em 0;
   width: 16em;
   border-radius: 5px;
 `;
 
 const InputAndTextContainer = styled.div`
-  margin: 0.5em 0;
+  margin: 0.25em 0;
 `;
 
 const Input = styled.input`
   color: ${(props) => color("text", props.darkMode)};
   display: flex;
   border-width: 1px;
-  padding: 0.5em 0.25em 0.5em 0.25em;
+  padding: 0.5em;
   border-radius: 5px;
   font-size: 1em;
-  width: 100%;
+  width: 15em;
   background-color: ${(props) => color("background2", props.darkMode)};
   ${({ failed }) =>
     failed &&
@@ -74,7 +74,7 @@ const Button = styled.button`
   font-family: "Open Sans", sans-serif;
   font-style: normal;
   font-size: 1.5em;
-  margin: 0.5em 0;
+  margin: 0.25em 0;
   padding: 0.5em;
   border: none;
   :focus {
@@ -91,7 +91,7 @@ const ErrorMessage = styled.div`
 `;
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -105,6 +105,7 @@ const App = () => {
   const [api, setApi] = useState(new Api());
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [lists, setLists] = useState(null);
 
   const login = async () => {
     console.log(username, password);
@@ -143,9 +144,22 @@ const App = () => {
     }
   };
 
+  const loadLists = async () => {
+    var response = await api.GetUserLists();
+    if (response.success) {
+        setLists(response.message);
+
+        console.log(lists);
+    }
+    else {
+        alert("Fel när listor skulle laddas: " + response.message);
+    }
+}
+
   const loggedInUpdater = () => {
     setLoggedIn(true);
     setLoggingIn(false);
+    loadLists();
   };
 
   const cleanUpForms = () => {
@@ -161,6 +175,7 @@ const App = () => {
       <NightThemeButtonContainer>
         <Text darkMode={darkMode}>Dark theme</Text>
         <NightThemeButton
+          defaultChecked={darkMode}
           onClick={() => {
             setDarkMode(!darkMode);
           }}
@@ -295,7 +310,10 @@ const App = () => {
             </Information>
           </div>
         )}
-        {loggedIn && <p>successfully logged in</p>}
+        {loggedIn && lists.map((list) => (
+          <h1>{list}</h1>
+        ))
+      }
       </Content>
     </Body>
   );

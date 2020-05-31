@@ -1,10 +1,10 @@
 import React from "react";
 import "./NightThemeButton.css";
 
-const NightThemeButton = ({ onClick }) => {
+const NightThemeButton = ({ defaultChecked, onClick }) => {
   return (
     <label className="switch">
-      <input type="checkbox" defaultChecked={true} onClick={onClick}></input>
+      <input type="checkbox" defaultChecked={defaultChecked} onClick={onClick}></input>
       <span className="slider round"></span>
     </label>
   );
