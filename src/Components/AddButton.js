@@ -1,5 +1,4 @@
 import React from "react";
-import color from "../Library/color";
 
 const AddButton = ({ width, height, color }) => {
   return (

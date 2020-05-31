@@ -1,4 +1,4 @@
-﻿import { getCookie, setCookie } from "./Cookies";
+﻿import { getCookie } from "./Cookies";
 export class Api {
   constructor() {
     this.basePath = "https://warm-plateau-84344.herokuapp.com/";
@@ -26,6 +26,7 @@ export class Api {
   }
 
   async GetResponse(method, url, data = null) {
+    this.token = getCookie("token");
     var requestUrl = this.basePath + url;
     var token = this.token;
     return new Promise(function (resolve, reject) {
@@ -56,7 +57,14 @@ export class Api {
     var path = "user/lists";
     return JSON.parse(await this.GetResponse("GET", path));
   }
-
+  async AddList(listName) {
+    var path = "user/lists";
+    return JSON.parse(
+      await this.GetResponse("POST", path, {
+        listName: listName,
+      })
+    );
+  }
   async GetListContent(listId) {
     var path = "listitems?listId=" + listId;
     return JSON.parse(await this.GetResponse("GET", path));

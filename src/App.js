@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import NightThemeButton from "./Components/NightThemeButton";
 import color from "./Library/color";
 import Api from "./Library/Api";
-import { setCookie } from "./Library/Cookies";
+import { setCookie, getCookie } from "./Library/Cookies";
 import AddButtonIcon from "./Components/AddButton";
 
 const Body = styled.div`
@@ -109,14 +109,19 @@ const App = () => {
   const [password2, setPassword2] = useState("");
   const [email, setEmail] = useState("");
   const [emailFailed, setEmailFailed] = useState(false);
-  const [api, setApi] = useState(new Api());
+  const [api] = useState(new Api());
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [lists, setLists] = useState(null);
+  const [addingList, setAddingListItem] = useState(false);
+  const [newListName, setNewListName] = useState("");
 
   window.onload = async function () {
     if (await api.GetIsAuthorized()) {
       await loadLists();
+      setLoggingIn(false);
+      setRegistering(false);
+      setLoggedIn(true);
     }
   };
 
@@ -127,8 +132,10 @@ const App = () => {
       setCookie("token", loginResponse.token, 100);
       setCookie("tokenDate", Date.now(), 100);
       setCookie("refreshToken", loginResponse.refreshToken, 100);
-      setApi(new Api());
-      await loggedInUpdater();
+      await loadLists();
+      setLoggingIn(false);
+      setRegistering(false);
+      setLoggedIn(true);
     } else {
       setUsernameFailed(true);
       setPasswordFailed(true);
@@ -156,21 +163,30 @@ const App = () => {
       alert("successfully created user");
     }
   };
+  const addList = async () => {
+    var result = await api.AddList(newListName);
+    if (!result.success) {
+      alert(result.message);
+      return;
+    } else {
+      setNewListName("");
+      setAddingListItem(false);
+      loadLists();
+    }
+  };
 
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
       setLists(response.message);
-
-      console.log(lists);
     } else {
-      alert("Fel när listor skulle laddas: " + response.message);
+      alert(
+        "Fel när listor skölle laddas: " +
+          response.message +
+          "\nTOKEN: " +
+          getCookie("token")
+      );
     }
-  };
-
-  const loggedInUpdater = () => {
-    setLoggedIn(true);
-    setLoggingIn(false);
   };
 
   const cleanUpForms = () => {
@@ -323,19 +339,40 @@ const App = () => {
             </Information>
           </div>
         )}
-        {loggedIn && (
+        {loggedIn && !addingList && (
           <Information darkMode={darkMode}>
-            <AddButton>
+            <AddButton
+              onClick={() => {
+                setAddingListItem(true);
+              }}
+            >
               <AddButtonIcon
                 width="60"
                 height="60"
                 color={color("primary", darkMode)}
               ></AddButtonIcon>
             </AddButton>
-
-            {lists.map((list) => (
-              <Button>{list.listname}</Button>
-            ))}
+            {lists &&
+              lists.map((list) => (
+                <Button key={list.listid}>{list.listname}</Button>
+              ))}
+          </Information>
+        )}
+        {loggedIn && addingList && (
+          <Information darkMode={darkMode}>
+            <InputAndTextContainer>
+              <Text darkMode={darkMode}>List name:</Text>
+              <Input
+                darkMode={darkMode}
+                value={newListName}
+                onChange={(event) => setNewListName(event.target.value)}
+              ></Input>
+              <Button
+                onClick={() => {
+                  addList();
+                }}
+              ></Button>
+            </InputAndTextContainer>
           </Information>
         )}
       </Content>
