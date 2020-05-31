@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
-
 const color = (colorCode, dark = true) => {
   if (dark) {
     switch (colorCode) {
       case "primary":
-        return "#79C0F2";
+        return "#2196f3";
+      case "primary2":
+        return "#0b7dda";
       case "background":
-        return "#282c34";
+        return "#1A1A1B";
       case "background2":
         return "#596273";
+      case "error":
+        return "#ea0027";
       default:
         break;
     }
@@ -16,10 +18,14 @@ const color = (colorCode, dark = true) => {
     switch (colorCode) {
       case "primary":
         return "#2196f3";
+      case "primary2":
+        return "#0b7dda";
       case "background":
-        return "#f1f2f4";
+        return "#ffffff";
       case "background2":
         return "#ffffff";
+      case "error":
+        return "#ea0027";
       default:
         break;
     }
