@@ -65,6 +65,11 @@ export class Api {
       })
     );
   }
+  async DeleteList(listId) {
+    var path = "list/remove?listId=" + listId;
+    return JSON.parse(await this.GetResponse("DELETE", path));
+  }
+
   async GetListContent(listId) {
     var path = "listitems?listId=" + listId;
     return JSON.parse(await this.GetResponse("GET", path));

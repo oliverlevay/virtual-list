@@ -175,6 +175,16 @@ const App = () => {
     }
   };
 
+  const deleteList = async (listId) => {
+    var result = await api.DeleteList(listId);
+    if (!result.success) {
+      alert(result.message);
+      return;
+    } else {
+      loadLists();
+    }
+  };
+
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
@@ -354,7 +364,12 @@ const App = () => {
             </AddButton>
             {lists &&
               lists.map((list) => (
-                <Button key={list.listid}>{list.listname}</Button>
+                <Button
+                  key={list.listid}
+                  onClick={() => deleteList(list.listid)}
+                >
+                  {list.listname}
+                </Button>
               ))}
           </Information>
         )}
