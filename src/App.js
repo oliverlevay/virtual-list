@@ -1,27 +1,21 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import NightThemeButton from "./Components/NightThemeButton";
-import color from "./Library/color";
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+
+import Color from "./Library/Color";
 import Api from "./Library/Api";
-import { setCookie, getCookie } from "./Library/Cookies";
+import { setCookie, getCookie, deleteCookie } from "./Library/Cookies";
+
 import AddButtonIcon from "./Components/AddButton";
 
 const Body = styled.div`
   display: flex;
   flex: 1;
   min-height: 100vh;
-  background-color: ${(props) => color("background", props.darkMode)};
+  background-color: ${Color.background};
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-
-const NightThemeButtonContainer = styled.div`
-  display: flex;
-  position: absolute;
-  top: 1em;
-  right: 1em;
-  flex-direction: row;
 `;
 
 const Content = styled.div`
@@ -31,7 +25,7 @@ const Content = styled.div`
 const Information = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: ${(props) => color("background", props.darkMode)};
+  background-color: ${Color.background};
   margin: 0.5em 0;
   width: 16em;
   border-radius: 5px;
@@ -42,24 +36,24 @@ const InputAndTextContainer = styled.div`
 `;
 
 const Input = styled.input`
-  color: ${(props) => color("text", props.darkMode)};
+  color: ${Color.text};
   display: flex;
   border-width: 1px;
   padding: 0.5em;
   border-radius: 5px;
   font-size: 1em;
   width: 15em;
-  background-color: ${(props) => color("background2", props.darkMode)};
+  background-color: ${Color.background2};
   ${({ failed }) =>
     failed &&
     `
   border-bottom-width: 2px;
-  border-bottom-color: ${color("error")};
+  border-bottom-color: ${Color.error};
   `}
 `;
 
 const Text = styled.div`
-  color: ${(props) => color("primary", props.darkMode)};
+  color: ${Color.primary};
   font-family: "Open Sans", sans-serif;
   font-style: normal;
   font-size: 1.5em;
@@ -68,9 +62,10 @@ const Text = styled.div`
 `;
 
 const Button = styled.button`
+  width: 100%;
   display: inline-block;
   text-align: center;
-  background-color: ${(props) => color("primary", props.darkMode)};
+  background-color: ${Color.primary};
   color: #ffffff;
   font-family: "Open Sans", sans-serif;
   font-style: normal;
@@ -78,27 +73,57 @@ const Button = styled.button`
   margin: 0.25em 0;
   padding: 0.5em;
   border: none;
+  border-radius: 3px;
   :focus {
-    background-color: ${(props) => color("primary2", props.darkMode)};
+    background-color: ${Color.primary2};
     outline: none;
   }
   :hover {
-    background-color: ${(props) => color("primary2", props.darkMode)};
+    background-color: ${Color.primary2};
   }
 `;
 
+const LogoutButton = styled(Button)`
+  font-size: 1em;
+`;
+
+const LogoutButtonContainer = styled.div`
+  display: flex;
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  flex-direction: row;
+`;
+
 const ErrorMessage = styled.div`
-  color: ${color("error")};
+  color: ${Color.error};
 `;
 
 const AddButton = styled.button`
   display: flex;
   align-self: center;
   padding: 0;
+  border: 0;
+  border-radius: 5px;
+`;
+
+const ListContextMenu = styled(ContextMenu)`
+  background-color: ${Color.background};
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.75);
+`;
+
+const ListContextMenuItem = styled(MenuItem)`
+  padding: 1em;
+  cursor: pointer;
+  :hover {
+    background-color: ${Color.primary2};
+  }
+  :focus {
+    outline: none;
+  }
 `;
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -207,23 +232,23 @@ const App = () => {
     setError("");
   };
 
+  const logout = () => {
+    setLoggedIn(false);
+    deleteCookie("token");
+    deleteCookie("tokenDate");
+    deleteCookie("refreshToken");
+  };
+
   return (
-    <Body darkMode={darkMode}>
-      <NightThemeButtonContainer>
-        <Text darkMode={darkMode}>Dark theme</Text>
-        <NightThemeButton
-          defaultChecked={darkMode}
-          onClick={() => {
-            setDarkMode(!darkMode);
-          }}
-        ></NightThemeButton>
-      </NightThemeButtonContainer>
+    <Body>
+      <LogoutButtonContainer>
+        <LogoutButton onClick={logout}>sign out</LogoutButton>
+      </LogoutButtonContainer>
       <Content>
         {!loggingIn && !registering && !loggedIn && (
           <div>
-            <Information darkMode={darkMode}>
+            <Information>
               <Button
-                darkMode={darkMode}
                 onClick={() => {
                   setLoggingIn(true);
                 }}
@@ -231,7 +256,6 @@ const App = () => {
                 login
               </Button>
               <Button
-                darkMode={darkMode}
                 onClick={() => {
                   setRegistering(true);
                 }}
@@ -243,11 +267,10 @@ const App = () => {
         )}
         {loggingIn && (
           <div>
-            <Information darkMode={darkMode}>
+            <Information>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>email/username:</Text>
+                <Text>email/username:</Text>
                 <Input
-                  darkMode={darkMode}
                   value={username}
                   failed={usernameFailed}
                   autoComplete="username"
@@ -255,10 +278,9 @@ const App = () => {
                 ></Input>
               </InputAndTextContainer>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>password:</Text>
+                <Text>password:</Text>
                 <Input
                   type="password"
-                  darkMode={darkMode}
                   value={password}
                   failed={passwordFailed}
                   autoComplete="password"
@@ -267,9 +289,8 @@ const App = () => {
               </InputAndTextContainer>
               <ErrorMessage>{error}</ErrorMessage>
             </Information>
-            <Information darkMode={darkMode}>
+            <Information>
               <Button
-                darkMode={darkMode}
                 onClick={() => {
                   setLoggingIn(false);
                   cleanUpForms();
@@ -279,7 +300,6 @@ const App = () => {
               </Button>
               <Button
                 type="submit"
-                darkMode={darkMode}
                 onClick={() => {
                   login();
                 }}
@@ -291,11 +311,10 @@ const App = () => {
         )}
         {registering && (
           <div>
-            <Information darkMode={darkMode}>
+            <Information>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>email:</Text>
+                <Text>email:</Text>
                 <Input
-                  darkMode={darkMode}
                   value={email}
                   failed={emailFailed}
                   onChange={(event) => setEmail(event.target.value)}
@@ -303,35 +322,31 @@ const App = () => {
                 <ErrorMessage>{emailError}</ErrorMessage>
               </InputAndTextContainer>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>username:</Text>
+                <Text>username:</Text>
                 <Input
-                  darkMode={darkMode}
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                 ></Input>
               </InputAndTextContainer>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>password:</Text>
+                <Text>password:</Text>
                 <Input
                   type="password"
-                  darkMode={darkMode}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                 ></Input>
               </InputAndTextContainer>
               <InputAndTextContainer>
-                <Text darkMode={darkMode}>repeat password:</Text>
+                <Text>repeat password:</Text>
                 <Input
                   type="password"
-                  darkMode={darkMode}
                   value={password2}
                   onChange={(event) => setPassword2(event.target.value)}
                 ></Input>
               </InputAndTextContainer>
             </Information>
-            <Information darkMode={darkMode}>
+            <Information>
               <Button
-                darkMode={darkMode}
                 onClick={() => {
                   setRegistering(false);
                 }}
@@ -339,7 +354,6 @@ const App = () => {
                 back
               </Button>
               <Button
-                darkMode={darkMode}
                 onClick={() => {
                   register();
                 }}
@@ -350,7 +364,29 @@ const App = () => {
           </div>
         )}
         {loggedIn && !addingList && (
-          <Information darkMode={darkMode}>
+          <Information>
+            {lists &&
+              lists.map((list) => (
+                <ContextMenuTrigger
+                  key={list.listid}
+                  id={list.listid.toString()}
+                >
+                  <Button>{list.listname}</Button>
+                  <ListContextMenu id={list.listid.toString()}>
+                    <ListContextMenuItem data={{ foo: "bar" }}>
+                      Rename
+                    </ListContextMenuItem>
+                    <ListContextMenuItem
+                      onClick={() => deleteList(list.listid)}
+                    >
+                      Delete
+                    </ListContextMenuItem>
+                    <ListContextMenuItem data={{ foo: "bar" }}>
+                      Favorite
+                    </ListContextMenuItem>
+                  </ListContextMenu>
+                </ContextMenuTrigger>
+              ))}
             <AddButton
               onClick={() => {
                 setAddingListItem(true);
@@ -359,26 +395,16 @@ const App = () => {
               <AddButtonIcon
                 width="60"
                 height="60"
-                color={color("primary", darkMode)}
+                color={Color.primary}
               ></AddButtonIcon>
             </AddButton>
-            {lists &&
-              lists.map((list) => (
-                <Button
-                  key={list.listid}
-                  onClick={() => deleteList(list.listid)}
-                >
-                  {list.listname}
-                </Button>
-              ))}
           </Information>
         )}
         {loggedIn && addingList && (
-          <Information darkMode={darkMode}>
+          <Information>
             <InputAndTextContainer>
-              <Text darkMode={darkMode}>List name:</Text>
+              <Text>List name:</Text>
               <Input
-                darkMode={darkMode}
                 value={newListName}
                 onChange={(event) => setNewListName(event.target.value)}
               ></Input>

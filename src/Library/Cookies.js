@@ -17,8 +17,8 @@ function getCookie(name) {
   }
   return null;
 }
-function eraseCookie(name) {
+function deleteCookie(name) {
   document.cookie = name + "=; Max-Age=-99999999;";
 }
 
-export { setCookie, getCookie };
+export { setCookie, getCookie, deleteCookie };
