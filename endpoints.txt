@@ -1,0 +1,66 @@
+/db POST
+	- password
+	- query
+
+/user/token POST
+	- (username)
+	- (email)
+	- password
+
+/user/create POST
+	- email
+	- username
+	- displayName
+	- password
+
+/user/lists POST
+	- [token]
+	- listName
+
+/user/lists GET
+	- [token]
+
+/listitems POST (man måste vara med i listan)
+	- [token]
+	b- listId
+	b- itemName
+	b- itemDescription
+
+/listitems GET (man måste vara med i listan)
+	- [token]
+	q- listId
+	q- itemId
+
+/listitems DELETE (man måste vara med i listan)
+	- [token]
+	- listId
+
+/list/users GET (man måste vara med i listan) - hämtar användare som är med i listan
+	- [token]
+	- listId
+
+/user/token/refresh POST
+	- [token]
+
+/list/clone POST (man måste vara med i listan)
+	- [token]
+	- listId
+	- newName
+
+/list/remove DELETE (man måste vara med i listan, bara ägaren raderar, de andra går ur listan bara)
+	- [token]
+	- listId
+
+/list/share POST (man måste vara med i listan)
+	- [token]
+	b- listId
+	b- userid
+
+/userid GET (man måste vara inloggad)
+	- [token]
+	q- userName
+
+--------------------------------
+
+/user/forgotpassword POST
+	- email
