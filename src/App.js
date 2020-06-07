@@ -260,9 +260,14 @@ const App = () => {
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
   };
-  const rename = (listId, listName) => {
+  const startRenaming = (listId, listName) => {
     setRenameName(listName);
     setRenamingId(listId);
+  };
+
+  const rename = () => {
+    cloneList(renamingId, renameName);
+    deleteList(renamingId);
   };
 
   useEffect(() => {
@@ -273,9 +278,11 @@ const App = () => {
 
   return (
     <Body>
-      <LogoutButtonContainer>
-        <LogoutButton onClick={logout}>sign out</LogoutButton>
-      </LogoutButtonContainer>
+      {loggedIn && (
+        <LogoutButtonContainer>
+          <LogoutButton onClick={logout}>sign out</LogoutButton>
+        </LogoutButtonContainer>
+      )}
       <Content>
         {!loggingIn && !registering && !loggedIn && (
           <div>
@@ -405,6 +412,7 @@ const App = () => {
                       id={renamingId}
                       value={renameName}
                       onChange={(event) => setRenameName(event.target.value)}
+                      onBlur={rename}
                     ></RenamingList>
                   )}
                   {renamingId !== list.listid && (
@@ -416,7 +424,9 @@ const App = () => {
                         <Button>{list.listname}</Button>
                         <ListContextMenu id={list.listid.toString()}>
                           <ListContextMenuItem
-                            onClick={() => rename(list.listid, list.listname)}
+                            onClick={() =>
+                              startRenaming(list.listid, list.listname)
+                            }
                           >
                             Rename
                           </ListContextMenuItem>
