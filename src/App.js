@@ -107,6 +107,21 @@ const AddButton = styled.button`
   border-radius: 5px;
 `;
 
+const RenamingList = styled.input`
+  width: 100%;
+  display: inline-block;
+  text-align: center;
+  background-color: ${Color.primary};
+  color: #ffffff;
+  font-family: "Open Sans", sans-serif;
+  font-style: normal;
+  font-size: 1.5em;
+  margin: 0.25em 0;
+  padding: 0.5em 0;
+  border: none;
+  border-radius: 3px;
+`;
+
 const ListContextMenu = styled(ContextMenu)`
   background-color: ${Color.background};
   box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.75);
@@ -114,6 +129,7 @@ const ListContextMenu = styled(ContextMenu)`
 
 const ListContextMenuItem = styled(MenuItem)`
   padding: 1em;
+  user-select: none;
   cursor: pointer;
   :hover {
     background-color: ${Color.primary2};
@@ -140,6 +156,8 @@ const App = () => {
   const [lists, setLists] = useState(null);
   const [addingList, setAddingListItem] = useState(false);
   const [newListName, setNewListName] = useState("");
+  const [renamingId, setRenamingId] = useState(null);
+  const [renameName, setRenameName] = useState("");
 
   window.onload = async function () {
     if (await api.GetIsAuthorized()) {
@@ -149,7 +167,6 @@ const App = () => {
       setLoggedIn(true);
     }
   };
-
   const login = async () => {
     console.log(username, password);
     var loginResponse = await api.Login(username, password);
@@ -167,7 +184,6 @@ const App = () => {
       setError(loginResponse.message);
     }
   };
-
   const register = async () => {
     if (password !== password2) {
       alert("Passwords don't match");
@@ -199,7 +215,6 @@ const App = () => {
       loadLists();
     }
   };
-
   const deleteList = async (listId) => {
     var result = await api.DeleteList(listId);
     if (!result.success) {
@@ -209,7 +224,16 @@ const App = () => {
       loadLists();
     }
   };
-
+  const cloneList = async (listId, listName) => {
+    console.log(listId, listName);
+    var result = await api.CloneList(listId, listName);
+    if (!result.success) {
+      alert(result.message);
+      return;
+    } else {
+      loadLists();
+    }
+  };
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
@@ -223,7 +247,6 @@ const App = () => {
       );
     }
   };
-
   const cleanUpForms = () => {
     setUsername("");
     setPassword("");
@@ -231,12 +254,15 @@ const App = () => {
     setPasswordFailed(false);
     setError("");
   };
-
   const logout = () => {
     setLoggedIn(false);
     deleteCookie("token");
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
+  };
+  const rename = (listId, listName) => {
+    setRenameName(listName);
+    setRenamingId(listId);
   };
 
   return (
@@ -367,25 +393,40 @@ const App = () => {
           <Information>
             {lists &&
               lists.map((list) => (
-                <ContextMenuTrigger
-                  key={list.listid}
-                  id={list.listid.toString()}
-                >
-                  <Button>{list.listname}</Button>
-                  <ListContextMenu id={list.listid.toString()}>
-                    <ListContextMenuItem data={{ foo: "bar" }}>
-                      Rename
-                    </ListContextMenuItem>
-                    <ListContextMenuItem
-                      onClick={() => deleteList(list.listid)}
-                    >
-                      Delete
-                    </ListContextMenuItem>
-                    <ListContextMenuItem data={{ foo: "bar" }}>
-                      Favorite
-                    </ListContextMenuItem>
-                  </ListContextMenu>
-                </ContextMenuTrigger>
+                <>
+                  {renamingId === list.listid && (
+                    <RenamingList
+                      id={list.listname + list.listid}
+                      value={renameName}
+                      onChange={(event) => setRenameName(event.target.value)}
+                    ></RenamingList>
+                  )}
+                  {renamingId !== list.listid && (
+                    <>
+                      <ContextMenuTrigger
+                        key={list.listid}
+                        id={list.listid.toString()}
+                      >
+                        <Button>{list.listname}</Button>
+                        <ListContextMenu id={list.listid.toString()}>
+                          <ListContextMenuItem
+                            onClick={() => rename(list.listid, list.listname)}
+                          >
+                            Rename
+                          </ListContextMenuItem>
+                          <ListContextMenuItem
+                            onClick={() => deleteList(list.listid)}
+                          >
+                            Delete
+                          </ListContextMenuItem>
+                          <ListContextMenuItem data={{ foo: "bar" }}>
+                            Favorite
+                          </ListContextMenuItem>
+                        </ListContextMenu>
+                      </ContextMenuTrigger>
+                    </>
+                  )}
+                </>
               ))}
             <AddButton
               onClick={() => {
