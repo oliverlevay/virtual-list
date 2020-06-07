@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
@@ -265,6 +265,12 @@ const App = () => {
     setRenamingId(listId);
   };
 
+  useEffect(() => {
+    if (renamingId) {
+      document.getElementById(renamingId).select();
+    }
+  }, [renamingId]);
+
   return (
     <Body>
       <LogoutButtonContainer>
@@ -396,7 +402,7 @@ const App = () => {
                 <>
                   {renamingId === list.listid && (
                     <RenamingList
-                      id={list.listname + list.listid}
+                      id={renamingId}
                       value={renameName}
                       onChange={(event) => setRenameName(event.target.value)}
                     ></RenamingList>
