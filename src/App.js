@@ -219,20 +219,19 @@ const App = () => {
     var result = await api.DeleteList(listId);
     if (!result.success) {
       alert(result.message);
-      return;
-    } else {
-      loadLists();
     }
+    loadLists();
   };
-  const cloneList = async (listId, listName) => {
+  const cloneList = async (listId, listName, renaming = false) => {
     console.log(listId, listName);
     var result = await api.CloneList(listId, listName);
     if (!result.success) {
       alert(result.message);
-      return;
-    } else {
+    }
+    if (!renaming) {
       loadLists();
     }
+    return result.success;
   };
   const loadLists = async () => {
     var response = await api.GetUserLists();
@@ -265,9 +264,10 @@ const App = () => {
     setRenamingId(listId);
   };
 
-  const rename = () => {
-    cloneList(renamingId, renameName);
-    deleteList(renamingId);
+  const rename = async () => {
+    if (await cloneList(renamingId, renameName, true)) {
+      deleteList(renamingId);
+    }
   };
 
   useEffect(() => {
