@@ -5,7 +5,6 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Color from "./Library/Color";
 import Api from "./Library/Api";
 import { setCookie, getCookie, deleteCookie } from "./Library/Cookies";
-
 import AddButtonIcon from "./Components/AddButton";
 
 const Body = styled.div`
@@ -28,7 +27,8 @@ const Information = styled.div`
   background-color: ${Color.background};
   margin: 0.5em 0;
   width: 16em;
-  border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  padding: 1em;
 `;
 
 const InputAndTextContainer = styled.div`
@@ -270,6 +270,17 @@ const App = () => {
     }
   };
 
+  const handleKeyPress = (key) => {
+    if (key === "Enter") {
+      if (loggingIn) {
+        login();
+      }
+      if (registering) {
+        register();
+      }
+    }
+  };
+
   useEffect(() => {
     if (renamingId) {
       document.getElementById(renamingId).select();
@@ -324,6 +335,7 @@ const App = () => {
                   failed={passwordFailed}
                   autoComplete="password"
                   onChange={(event) => setPassword(event.target.value)}
+                  onKeyPress={(event) => handleKeyPress(event.key)}
                 ></Input>
               </InputAndTextContainer>
               <ErrorMessage>{error}</ErrorMessage>
@@ -381,6 +393,7 @@ const App = () => {
                   type="password"
                   value={password2}
                   onChange={(event) => setPassword2(event.target.value)}
+                  onKeyPress={(event) => handleKeyPress(event.key)}
                 ></Input>
               </InputAndTextContainer>
             </Information>
