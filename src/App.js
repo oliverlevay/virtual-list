@@ -128,9 +128,17 @@ const ListContainer = styled.div`
   flex-direction: row;
 `;
 
+const ListButton = styled(Button)`
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+`;
+
 const OpenContextMenuButton = styled(Button)`
   display: flex;
   width: 10%;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding: 0;
 `;
 
 const ListContextMenu = styled(ContextMenu)`
@@ -155,6 +163,7 @@ const ThreeDots = styled.p`
   white-space: nowrap;
   display: block;
   margin: 0;
+  padding: 0.5em;
 `;
 
 const App = () => {
@@ -472,7 +481,7 @@ const App = () => {
                           id={list.listid.toString()}
                         >
                           <ListContainer>
-                            <Button>{list.listname}</Button>
+                            <ListButton>{list.listname}</ListButton>
                             <OpenContextMenuButton
                               onClick={(event) =>
                                 openContextMenu(event, list.listid.toString())
