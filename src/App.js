@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import { showMenu } from "react-contextmenu/modules/actions";
 
 import Color from "./Library/Color";
 import Api from "./Library/Api";
@@ -122,6 +123,16 @@ const RenamingList = styled.input`
   border-radius: 3px;
 `;
 
+const ListContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const OpenContextMenuButton = styled(Button)`
+  display: flex;
+  width: 10%;
+`;
+
 const ListContextMenu = styled(ContextMenu)`
   background-color: ${Color.background};
   box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.75);
@@ -139,6 +150,13 @@ const ListContextMenuItem = styled(MenuItem)`
   }
 `;
 
+const ThreeDots = styled.p`
+  transform: rotate(90deg);
+  white-space: nowrap;
+  display: block;
+  margin: 0;
+`;
+
 const App = () => {
   const [loggingIn, setLoggingIn] = useState(false);
   const [registering, setRegistering] = useState(false);
@@ -154,8 +172,9 @@ const App = () => {
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [lists, setLists] = useState(null);
-  const [addingList, setAddingListItem] = useState(false);
+  const [addingList, setAddingList] = useState(false);
   const [newListName, setNewListName] = useState("");
+  const [renaming, setRenaming] = useState(false);
   const [renamingId, setRenamingId] = useState(null);
   const [renameName, setRenameName] = useState("");
 
@@ -211,7 +230,7 @@ const App = () => {
       return;
     } else {
       setNewListName("");
-      setAddingListItem(false);
+      setAddingList(false);
       loadLists();
     }
   };
@@ -255,11 +274,13 @@ const App = () => {
   };
   const logout = () => {
     setLoggedIn(false);
+    setAddingList(false);
     deleteCookie("token");
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
   };
   const startRenaming = (listId, listName) => {
+    setRenaming(true);
     setRenameName(listName);
     setRenamingId(listId);
   };
@@ -267,6 +288,7 @@ const App = () => {
   const rename = async () => {
     if (await cloneList(renamingId, renameName, true)) {
       deleteList(renamingId);
+      setRenaming(false);
     }
   };
 
@@ -279,6 +301,17 @@ const App = () => {
         register();
       }
     }
+  };
+
+  const openContextMenu = (event, id) => {
+    const x = event.clientX;
+    const y = event.clientY;
+    console.log(x, y, event);
+    showMenu({
+      position: { x, y },
+      target: event.target,
+      id: id,
+    });
   };
 
   useEffect(() => {
@@ -361,7 +394,7 @@ const App = () => {
           </div>
         )}
         {registering && (
-          <div>
+          <>
             <Information>
               <InputAndTextContainer>
                 <Text>email:</Text>
@@ -413,78 +446,91 @@ const App = () => {
                 register
               </Button>
             </Information>
-          </div>
+          </>
         )}
-        {loggedIn && !addingList && (
-          <Information>
-            {lists &&
-              lists.map((list) => (
-                <>
-                  {renamingId === list.listid && (
-                    <RenamingList
-                      id={renamingId}
-                      value={renameName}
-                      onChange={(event) => setRenameName(event.target.value)}
-                      onBlur={rename}
-                    ></RenamingList>
-                  )}
-                  {renamingId !== list.listid && (
+        {loggedIn && (
+          <>
+            {!addingList && (
+              <Information>
+                {lists &&
+                  lists.map((list) => (
                     <>
-                      <ContextMenuTrigger
-                        key={list.listid}
-                        id={list.listid.toString()}
-                      >
-                        <Button>{list.listname}</Button>
-                        <ListContextMenu id={list.listid.toString()}>
-                          <ListContextMenuItem
-                            onClick={() =>
-                              startRenaming(list.listid, list.listname)
-                            }
-                          >
-                            Rename
-                          </ListContextMenuItem>
-                          <ListContextMenuItem
-                            onClick={() => deleteList(list.listid)}
-                          >
-                            Delete
-                          </ListContextMenuItem>
-                          <ListContextMenuItem data={{ foo: "bar" }}>
-                            Favorite
-                          </ListContextMenuItem>
-                        </ListContextMenu>
-                      </ContextMenuTrigger>
+                      {renamingId === list.listid && (
+                        <RenamingList
+                          id={renamingId}
+                          value={renameName}
+                          onChange={(event) =>
+                            setRenameName(event.target.value)
+                          }
+                          onKeyPress={(event) => handleKeyPress(event.key)}
+                          onBlur={rename}
+                        ></RenamingList>
+                      )}
+                      {renamingId !== list.listid && (
+                        <ContextMenuTrigger
+                          key={list.listid}
+                          id={list.listid.toString()}
+                        >
+                          <ListContainer>
+                            <Button>{list.listname}</Button>
+                            <OpenContextMenuButton
+                              onClick={(event) =>
+                                openContextMenu(event, list.listid.toString())
+                              }
+                            >
+                              <ThreeDots>...</ThreeDots>
+                            </OpenContextMenuButton>
+                          </ListContainer>
+                          <ListContextMenu id={list.listid.toString()}>
+                            <ListContextMenuItem
+                              onClick={() =>
+                                startRenaming(list.listid, list.listname)
+                              }
+                            >
+                              Rename
+                            </ListContextMenuItem>
+                            <ListContextMenuItem
+                              onClick={() => deleteList(list.listid)}
+                            >
+                              Delete
+                            </ListContextMenuItem>
+                          </ListContextMenu>
+                        </ContextMenuTrigger>
+                      )}
                     </>
-                  )}
-                </>
-              ))}
-            <AddButton
-              onClick={() => {
-                setAddingListItem(true);
-              }}
-            >
-              <AddButtonIcon
-                width="60"
-                height="60"
-                color={Color.primary}
-              ></AddButtonIcon>
-            </AddButton>
-          </Information>
-        )}
-        {loggedIn && addingList && (
-          <Information>
-            <InputAndTextContainer>
-              <Text>List name:</Text>
-              <Input
-                value={newListName}
-                onChange={(event) => setNewListName(event.target.value)}
-              ></Input>
-              <Button
-                onClick={() => {
-                  addList();
-                }}
-              ></Button>
-            </InputAndTextContainer>
-          </Information>
+                  ))}
+                <AddButton
+                  onClick={() => {
+                    setAddingList(true);
+                  }}
+                >
+                  <AddButtonIcon
+                    width="60"
+                    height="60"
+                    color={Color.primary}
+                  ></AddButtonIcon>
+                </AddButton>
+              </Information>
+            )}
+            {addingList && (
+              <Information>
+                <InputAndTextContainer>
+                  <Text>List name:</Text>
+                  <Input
+                    value={newListName}
+                    onChange={(event) => setNewListName(event.target.value)}
+                  ></Input>
+                  <Button
+                    onClick={() => {
+                      addList();
+                    }}
+                  >
+                    add
+                  </Button>
+                </InputAndTextContainer>
+              </Information>
+            )}
+          </>
         )}
       </Content>
     </Body>
