@@ -69,6 +69,15 @@ export class Api {
     var path = "list/remove?listId=" + listId;
     return JSON.parse(await this.GetResponse("DELETE", path));
   }
+  async RenameList(listId, newName) {
+    var path = "list/rename";
+    return JSON.parse(
+      await this.GetResponse("POST", path, {
+        listId: listId,
+        newName: newName,
+      })
+    );
+  }
   async CloneList(listId, newName) {
     var path = "list/clone";
     return JSON.parse(

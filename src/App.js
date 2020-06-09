@@ -183,8 +183,7 @@ const App = () => {
   const [lists, setLists] = useState(null);
   const [addingList, setAddingList] = useState(false);
   const [newListName, setNewListName] = useState("");
-  const [renaming, setRenaming] = useState(false);
-  const [renamingId, setRenamingId] = useState(null);
+  const [renameId, setRenameId] = useState(null);
   const [renameName, setRenameName] = useState("");
 
   window.onload = async function () {
@@ -250,21 +249,22 @@ const App = () => {
     }
     loadLists();
   };
-  const cloneList = async (listId, listName, renaming = false) => {
+  const cloneList = async (listId, listName) => {
     console.log(listId, listName);
     var result = await api.CloneList(listId, listName);
     if (!result.success) {
       alert(result.message);
     }
-    if (!renaming) {
-      loadLists();
-    }
-    return result.success;
+    loadLists();
   };
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
-      setLists(response.message);
+      setLists(
+        response.message.sort((a, b) => {
+          return a.listid - b.listid;
+        })
+      );
     } else {
       alert(
         "Fel när listor skölle laddas: " +
@@ -289,16 +289,17 @@ const App = () => {
     deleteCookie("refreshToken");
   };
   const startRenaming = (listId, listName) => {
-    setRenaming(true);
     setRenameName(listName);
-    setRenamingId(listId);
+    setRenameId(listId);
   };
 
   const rename = async () => {
-    if (await cloneList(renamingId, renameName, true)) {
-      deleteList(renamingId);
-      setRenaming(false);
+    var result = await api.RenameList(renameId, renameName);
+    if (!result.success) {
+      alert(result.message);
     }
+    await loadLists();
+    setRenameId(null);
   };
 
   const handleKeyPress = (key) => {
@@ -324,10 +325,10 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (renamingId) {
-      document.getElementById(renamingId).select();
+    if (renameId) {
+      document.getElementById(renameId).select();
     }
-  }, [renamingId]);
+  }, [renameId]);
 
   return (
     <Body>
@@ -464,9 +465,9 @@ const App = () => {
                 {lists &&
                   lists.map((list) => (
                     <>
-                      {renamingId === list.listid && (
+                      {renameId === list.listid && (
                         <RenamingList
-                          id={renamingId}
+                          id={renameId}
                           value={renameName}
                           onChange={(event) =>
                             setRenameName(event.target.value)
@@ -475,7 +476,7 @@ const App = () => {
                           onBlur={rename}
                         ></RenamingList>
                       )}
-                      {renamingId !== list.listid && (
+                      {renameId !== list.listid && (
                         <ContextMenuTrigger
                           key={list.listid}
                           id={list.listid.toString()}
