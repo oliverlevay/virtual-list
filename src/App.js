@@ -1,11 +1,20 @@
+
+//components
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import { showMenu } from "react-contextmenu/modules/actions";
 
-import Color from "./Library/Color";
-import Api from "./Library/Api";
-import { setCookie, getCookie, deleteCookie } from "./Library/Cookies";
+//states
+import None from "./States/None/None";
+
+//books from the library
+import Color from "./Library/Constants/Color";
+import Api from "./Library/Scripts/Api";
+import { setCookie, getCookie, deleteCookie } from "./Library/Scripts/Cookies";
+import { Information, InputAndTextContainer, Input, Text, Button} from "./Library/Constants/Blocks";
+
+//components
 import AddButtonIcon from "./Components/AddButton";
 
 const Body = styled.div`
@@ -20,68 +29,6 @@ const Body = styled.div`
 
 const Content = styled.div`
   display: flex;
-`;
-
-const Information = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: ${Color.background};
-  margin: 0.5em 0;
-  width: 16em;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  padding: 1em;
-`;
-
-const InputAndTextContainer = styled.div`
-  margin: 0.25em 0;
-`;
-
-const Input = styled.input`
-  color: ${Color.text};
-  display: flex;
-  border-width: 1px;
-  padding: 0.5em;
-  border-radius: 5px;
-  font-size: 1em;
-  width: 15em;
-  background-color: ${Color.background2};
-  ${({ failed }) =>
-    failed &&
-    `
-  border-bottom-width: 2px;
-  border-bottom-color: ${Color.error};
-  `}
-`;
-
-const Text = styled.div`
-  color: ${Color.primary};
-  font-family: "Open Sans", sans-serif;
-  font-style: normal;
-  font-size: 1.5em;
-  margin-bottom: 0.5em;
-  margin-right: 0.5em;
-`;
-
-const Button = styled.button`
-  width: 100%;
-  display: inline-block;
-  text-align: center;
-  background-color: ${Color.primary};
-  color: #ffffff;
-  font-family: "Open Sans", sans-serif;
-  font-style: normal;
-  font-size: 1.5em;
-  margin: 0.25em 0;
-  padding: 0.5em;
-  border: none;
-  border-radius: 3px;
-  :focus {
-    background-color: ${Color.primary2};
-    outline: none;
-  }
-  :hover {
-    background-color: ${Color.primary2};
-  }
 `;
 
 const LogoutButton = styled(Button)`
@@ -285,10 +232,6 @@ const App = () => {
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
   };
-  const startRenaming = (listId, listName) => {
-    setRenameName(listName);
-    setRenameId(listId);
-  };
 
   const rename = async () => {
     var result = await api.RenameList(renameId, renameName);
@@ -297,6 +240,11 @@ const App = () => {
     }
     await loadLists();
     setRenameId(null);
+  };
+
+  const startRenaming = (listId, listName) => {
+    setRenameName(listName);
+    setRenameId(listId);
   };
 
   const handleKeyPress = (key) => {
@@ -336,24 +284,7 @@ const App = () => {
       )}
       <Content>
         {currentState === State.none && (
-          <div>
-            <Information>
-              <Button
-                onClick={() => {
-                  setCurrentState(State.loggingIn);
-                }}
-              >
-                login
-              </Button>
-              <Button
-                onClick={() => {
-                  setCurrentState(State.registering);
-                }}
-              >
-                register
-              </Button>
-            </Information>
-          </div>
+          <None setCurrentState={setCurrentState}/>
         )}
         {currentState === State.loggingIn && (
           <div>
