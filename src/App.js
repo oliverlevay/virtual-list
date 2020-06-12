@@ -166,10 +166,15 @@ const ThreeDots = styled.p`
   padding: 0.5em;
 `;
 
+const State = {
+  none: 'none',
+  loggingIn: 'loggingIn',
+  registering: 'registering',
+  loggedIn: 'loggedIn',
+}
+
 const App = () => {
-  const [loggingIn, setLoggingIn] = useState(false);
-  const [registering, setRegistering] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentState, setCurrentState] = useState(State.none);
   const [username, setUsername] = useState("");
   const [usernameFailed, setUsernameFailed] = useState(false);
   const [password, setPassword] = useState("");
@@ -189,22 +194,17 @@ const App = () => {
   window.onload = async function () {
     if (await api.GetIsAuthorized()) {
       await loadLists();
-      setLoggingIn(false);
-      setRegistering(false);
-      setLoggedIn(true);
+      setCurrentState(State.loggedIn);
     }
   };
   const login = async () => {
-    console.log(username, password);
     var loginResponse = await api.Login(username, password);
     if (loginResponse.success) {
       setCookie("token", loginResponse.token, 100);
       setCookie("tokenDate", Date.now(), 100);
       setCookie("refreshToken", loginResponse.refreshToken, 100);
       await loadLists();
-      setLoggingIn(false);
-      setRegistering(false);
-      setLoggedIn(true);
+      setCurrentState(State.loggedIn);
     } else {
       setUsernameFailed(true);
       setPasswordFailed(true);
@@ -214,8 +214,6 @@ const App = () => {
   const register = async () => {
     if (password !== password2) {
       alert("Passwords don't match");
-      setPassword("");
-      setPassword2("");
     }
     if (!email.includes("@") || !email.includes(".")) {
       setEmailError("That doesn't look like a valid email address");
@@ -282,8 +280,7 @@ const App = () => {
     setError("");
   };
   const logout = () => {
-    setLoggedIn(false);
-    setAddingList(false);
+    setCurrentState(State.none);
     deleteCookie("token");
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
@@ -304,10 +301,10 @@ const App = () => {
 
   const handleKeyPress = (key) => {
     if (key === "Enter") {
-      if (loggingIn) {
+      if (currentState === State.loggingIn) {
         login();
       }
-      if (registering) {
+      if (currentState === State.registering) {
         register();
       }
     }
@@ -332,25 +329,25 @@ const App = () => {
 
   return (
     <Body>
-      {loggedIn && (
+      {currentState === State.loggedIn && (
         <LogoutButtonContainer>
           <LogoutButton onClick={logout}>sign out</LogoutButton>
         </LogoutButtonContainer>
       )}
       <Content>
-        {!loggingIn && !registering && !loggedIn && (
+        {currentState === State.none && (
           <div>
             <Information>
               <Button
                 onClick={() => {
-                  setLoggingIn(true);
+                  setCurrentState(State.loggingIn);
                 }}
               >
                 login
               </Button>
               <Button
                 onClick={() => {
-                  setRegistering(true);
+                  setCurrentState(State.registering);
                 }}
               >
                 register
@@ -358,7 +355,7 @@ const App = () => {
             </Information>
           </div>
         )}
-        {loggingIn && (
+        {currentState === State.loggingIn && (
           <div>
             <Information>
               <InputAndTextContainer>
@@ -386,7 +383,7 @@ const App = () => {
             <Information>
               <Button
                 onClick={() => {
-                  setLoggingIn(false);
+                  setCurrentState(State.none);
                   cleanUpForms();
                 }}
               >
@@ -403,8 +400,8 @@ const App = () => {
             </Information>
           </div>
         )}
-        {registering && (
-          <>
+        {currentState === State.registering && (
+          <div>
             <Information>
               <InputAndTextContainer>
                 <Text>email:</Text>
@@ -443,7 +440,7 @@ const App = () => {
             <Information>
               <Button
                 onClick={() => {
-                  setRegistering(false);
+                  setCurrentState(State.none);
                 }}
               >
                 back
@@ -456,9 +453,9 @@ const App = () => {
                 register
               </Button>
             </Information>
-          </>
+          </div>
         )}
-        {loggedIn && (
+        {currentState === State.loggedIn && (
           <>
             {!addingList && (
               <Information>
