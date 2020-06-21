@@ -7,12 +7,13 @@ import { showMenu } from "react-contextmenu/modules/actions";
 
 //states
 import None from "./States/None/None";
+import LoggingIn from "./States/LoggingIn/LoggingIn"
 
 //books from the library
 import Color from "./Library/Constants/Color";
 import Api from "./Library/Scripts/Api";
 import { setCookie, getCookie, deleteCookie } from "./Library/Scripts/Cookies";
-import { Information, InputAndTextContainer, Input, Text, Button} from "./Library/Constants/Blocks";
+import { Information, InputAndTextContainer, Input, Text, Button, ErrorMessage} from "./Library/Constants/Blocks";
 
 //components
 import AddButtonIcon from "./Components/AddButton";
@@ -41,10 +42,6 @@ const LogoutButtonContainer = styled.div`
   top: 1em;
   left: 1em;
   flex-direction: row;
-`;
-
-const ErrorMessage = styled.div`
-  color: ${Color.error};
 `;
 
 const AddButton = styled.button`
@@ -287,49 +284,7 @@ const App = () => {
           <None setCurrentState={setCurrentState}/>
         )}
         {currentState === State.loggingIn && (
-          <div>
-            <Information>
-              <InputAndTextContainer>
-                <Text>email/username:</Text>
-                <Input
-                  value={username}
-                  failed={usernameFailed}
-                  autoComplete="username"
-                  onChange={(event) => setUsername(event.target.value)}
-                ></Input>
-              </InputAndTextContainer>
-              <InputAndTextContainer>
-                <Text>password:</Text>
-                <Input
-                  type="password"
-                  value={password}
-                  failed={passwordFailed}
-                  autoComplete="password"
-                  onChange={(event) => setPassword(event.target.value)}
-                  onKeyPress={(event) => handleKeyPress(event.key)}
-                ></Input>
-              </InputAndTextContainer>
-              <ErrorMessage>{error}</ErrorMessage>
-            </Information>
-            <Information>
-              <Button
-                onClick={() => {
-                  setCurrentState(State.none);
-                  cleanUpForms();
-                }}
-              >
-                back
-              </Button>
-              <Button
-                type="submit"
-                onClick={() => {
-                  login();
-                }}
-              >
-                login
-              </Button>
-            </Information>
-          </div>
+          <LoggngIn setCurrentState={setCurrentState}/>
         )}
         {currentState === State.registering && (
           <div>

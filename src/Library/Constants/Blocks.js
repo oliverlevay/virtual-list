@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import Color from "./Color"
 
 export const Information = styled.div`
   display: flex;
@@ -60,4 +61,8 @@ export const Button = styled.button`
   :hover {
     background-color: ${Color.primary2};
   }
+`;
+
+export const ErrorMessage = styled.div`
+  color: ${Color.error};
 `;

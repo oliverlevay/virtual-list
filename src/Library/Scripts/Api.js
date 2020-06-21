@@ -1,4 +1,4 @@
-﻿import { getCookie } from "../Cookies";
+﻿import { getCookie } from "./Cookies";
 export class Api {
   constructor() {
     this.basePath = "https://warm-plateau-84344.herokuapp.com/";
