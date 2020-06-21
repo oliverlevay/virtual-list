@@ -1,4 +1,3 @@
-
 //components
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
@@ -6,17 +5,31 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import { showMenu } from "react-contextmenu/modules/actions";
 
 //states
-import None from "./States/None/None";
-import LoggingIn from "./States/LoggingIn/LoggingIn"
+import None from "./States/None";
+import LoggingIn from "./States/LoggingIn";
 
 //books from the library
 import Color from "./Library/Constants/Color";
 import Api from "./Library/Scripts/Api";
 import { setCookie, getCookie, deleteCookie } from "./Library/Scripts/Cookies";
-import { Information, InputAndTextContainer, Input, Text, Button, ErrorMessage} from "./Library/Constants/Blocks";
+import {
+  Information,
+  InputAndTextContainer,
+  Input,
+  Text,
+  Button,
+  ErrorMessage,
+} from "./Library/Constants/Blocks";
 
 //components
 import AddButtonIcon from "./Components/AddButton";
+
+const State = {
+  none: "none",
+  loggingIn: "loggingIn",
+  registering: "registering",
+  loggedIn: "loggedIn",
+};
 
 const Body = styled.div`
   display: flex;
@@ -110,61 +123,99 @@ const ThreeDots = styled.p`
   padding: 0.5em;
 `;
 
-const State = {
-  none: 'none',
-  loggingIn: 'loggingIn',
-  registering: 'registering',
-  loggedIn: 'loggedIn',
-}
-
 const App = () => {
-  const [currentState, setCurrentState] = useState(State.none);
-  const [username, setUsername] = useState("");
-  const [usernameFailed, setUsernameFailed] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordFailed, setPasswordFailed] = useState(false);
-  const [password2, setPassword2] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailFailed, setEmailFailed] = useState(false);
-  const [api] = useState(new Api());
-  const [error, setError] = useState("");
-  const [emailError, setEmailError] = useState("");
+  //#region SuperState
+  const [states, setStates] = useState({
+    currentState: State.none,
+    username: "",
+    usernameFailed: false,
+    password: "",
+    passwordFailed: false,
+    password2: "",
+    email: "",
+    emailFailed: false,
+    error: "",
+    emailError: "",
+    addingList: false,
+    newListName: "",
+    renameId: null,
+    renameName: "",
+  });
+  function updateSuperState({
+    currentState = states.currentState,
+    username = states.username,
+    usernameFailed = states.usernameFailed,
+    password = states.password,
+    passwordFailed = states.passwordFailed,
+    password2 = states.password2,
+    email = states.email,
+    emailFailed = states.emailFailed,
+    error = states.error,
+    emailError = states.emailError,
+    addingList = states.addingList,
+    newListName = states.newListName,
+    renameId = states.renameId,
+    renameName = states.renameName,
+  } = {}) {
+    setStates({
+      currentState: currentState,
+      username: username,
+      usernameFailed: usernameFailed,
+      password: password,
+      passwordFailed: passwordFailed,
+      password2: password2,
+      email: email,
+      emailFailed: emailFailed,
+      error: error,
+      emailError: emailError,
+      addingList: addingList,
+      newListName: newListName,
+      renameId: renameId,
+      renameName: renameName,
+    });
+  }
+  //#endregion
   const [lists, setLists] = useState(null);
-  const [addingList, setAddingList] = useState(false);
-  const [newListName, setNewListName] = useState("");
-  const [renameId, setRenameId] = useState(null);
-  const [renameName, setRenameName] = useState("");
-
+  const [api] = useState(new Api());
   window.onload = async function () {
     if (await api.GetIsAuthorized()) {
       await loadLists();
-      setCurrentState(State.loggedIn);
+      updateSuperState({ currentState: State.loggedIn });
     }
   };
   const login = async () => {
-    var loginResponse = await api.Login(username, password);
+    var loginResponse = await api.Login(states.username, states.password);
     if (loginResponse.success) {
       setCookie("token", loginResponse.token, 100);
       setCookie("tokenDate", Date.now(), 100);
       setCookie("refreshToken", loginResponse.refreshToken, 100);
       await loadLists();
-      setCurrentState(State.loggedIn);
+      updateSuperState({ currentState: State.loggedIn });
     } else {
-      setUsernameFailed(true);
-      setPasswordFailed(true);
-      setError(loginResponse.message);
+      updateSuperState({
+        usernameFailed: true,
+        passwordFailed: true,
+        error: loginResponse.message,
+      });
     }
   };
   const register = async () => {
-    if (password !== password2) {
+    if (states.password !== states.password2) {
       alert("Passwords don't match");
     }
-    if (!email.includes("@") || !email.includes(".")) {
-      setEmailError("That doesn't look like a valid email address");
-      setEmailFailed(true);
+    if (!states.email.includes("@") || !states.email.includes(".")) {
+      updateSuperState({
+        emailError: "That doesn't look like a valid email address",
+        emailFailed: true,
+      });
       return;
     }
-    var result = await api.CreateUser(email, username, username, password);
+    var result = await api.CreateUser(
+      states.email,
+      states.username,
+      states.username,
+      states.password
+    );
 
     if (!result.success) {
       alert(result.message);
@@ -174,13 +225,12 @@ const App = () => {
     }
   };
   const addList = async () => {
-    var result = await api.AddList(newListName);
+    var result = await api.AddList(states.newListName);
     if (!result.success) {
       alert(result.message);
       return;
     } else {
-      setNewListName("");
-      setAddingList(false);
+      updateSuperState({ newListName: "", addingList: false });
       loadLists();
     }
   };
@@ -192,7 +242,6 @@ const App = () => {
     loadLists();
   };
   const cloneList = async (listId, listName) => {
-    console.log(listId, listName);
     var result = await api.CloneList(listId, listName);
     if (!result.success) {
       alert(result.message);
@@ -202,11 +251,7 @@ const App = () => {
   const loadLists = async () => {
     var response = await api.GetUserLists();
     if (response.success) {
-      setLists(
-        response.message.sort((a, b) => {
-          return a.listid - b.listid;
-        })
-      );
+      setLists(response.message);
     } else {
       alert(
         "Fel när listor skölle laddas: " +
@@ -216,40 +261,33 @@ const App = () => {
       );
     }
   };
-  const cleanUpForms = () => {
-    setUsername("");
-    setPassword("");
-    setUsernameFailed(false);
-    setPasswordFailed(false);
-    setError("");
-  };
+
   const logout = () => {
-    setCurrentState(State.none);
+    updateSuperState({ currentState: State.none });
     deleteCookie("token");
     deleteCookie("tokenDate");
     deleteCookie("refreshToken");
   };
 
   const rename = async () => {
-    var result = await api.RenameList(renameId, renameName);
+    var result = await api.RenameList(states.renameId, states.renameName);
     if (!result.success) {
       alert(result.message);
     }
     await loadLists();
-    setRenameId(null);
+    updateSuperState({ renameId: null });
   };
 
   const startRenaming = (listId, listName) => {
-    setRenameName(listName);
-    setRenameId(listId);
+    updateSuperState({ renameName: listName, renameId: listId });
   };
 
   const handleKeyPress = (key) => {
     if (key === "Enter") {
-      if (currentState === State.loggingIn) {
+      if (states.currentState === State.loggingIn) {
         login();
       }
-      if (currentState === State.registering) {
+      if (states.currentState === State.registering) {
         register();
       }
     }
@@ -267,58 +305,72 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (renameId) {
-      document.getElementById(renameId).select();
+    if (states.renameId) {
+      document.getElementById(states.renameId).select();
     }
-  }, [renameId]);
+  }, [states.renameId]);
 
   return (
     <Body>
-      {currentState === State.loggedIn && (
+      {states.currentState === State.loggedIn && (
         <LogoutButtonContainer>
           <LogoutButton onClick={logout}>sign out</LogoutButton>
         </LogoutButtonContainer>
       )}
       <Content>
-        {currentState === State.none && (
-          <None setCurrentState={setCurrentState}/>
+        {states.currentState === State.none && (
+          <None updateSuperState={updateSuperState} />
         )}
-        {currentState === State.loggingIn && (
-          <LoggngIn setCurrentState={setCurrentState}/>
+        {states.currentState === State.loggingIn && (
+          <LoggingIn
+            states={states}
+            updateSuperState={updateSuperState}
+            State={State}
+            handleKeyPress={handleKeyPress}
+            login={login}
+          />
         )}
-        {currentState === State.registering && (
+        {states.currentState === State.registering && (
           <div>
             <Information>
               <InputAndTextContainer>
                 <Text>email:</Text>
                 <Input
-                  value={email}
-                  failed={emailFailed}
-                  onChange={(event) => setEmail(event.target.value)}
+                  value={states.email}
+                  failed={states.emailFailed}
+                  onChange={(event) =>
+                    updateSuperState({ email: event.target.value })
+                  }
                 ></Input>
-                <ErrorMessage>{emailError}</ErrorMessage>
+                <ErrorMessage>{states.emailError}</ErrorMessage>
               </InputAndTextContainer>
               <InputAndTextContainer>
                 <Text>username:</Text>
                 <Input
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
+                  value={states.username}
+                  onChange={(event) =>
+                    updateSuperState({ username: event.target.value })
+                  }
                 ></Input>
               </InputAndTextContainer>
               <InputAndTextContainer>
                 <Text>password:</Text>
                 <Input
                   type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
+                  value={states.password}
+                  onChange={(event) =>
+                    updateSuperState({ password: event.target.value })
+                  }
                 ></Input>
               </InputAndTextContainer>
               <InputAndTextContainer>
                 <Text>repeat password:</Text>
                 <Input
                   type="password"
-                  value={password2}
-                  onChange={(event) => setPassword2(event.target.value)}
+                  value={states.password2}
+                  onChange={(event) =>
+                    updateSuperState({ password2: event.target.value })
+                  }
                   onKeyPress={(event) => handleKeyPress(event.key)}
                 ></Input>
               </InputAndTextContainer>
@@ -326,7 +378,7 @@ const App = () => {
             <Information>
               <Button
                 onClick={() => {
-                  setCurrentState(State.none);
+                  updateSuperState({ currentState: State.none });
                 }}
               >
                 back
@@ -341,25 +393,27 @@ const App = () => {
             </Information>
           </div>
         )}
-        {currentState === State.loggedIn && (
+        {states.currentState === State.loggedIn && (
           <>
-            {!addingList && (
+            {!states.addingList && (
               <Information>
-                {lists &&
+                {lists.length > 1 &&
                   lists.map((list) => (
-                    <>
-                      {renameId === list.listid && (
+                    <React.Fragment
+                      key={`addinglist mapping ${list.listid}+${list.listname}`}
+                    >
+                      {states.renameId === list.listid && (
                         <RenamingList
-                          id={renameId}
-                          value={renameName}
+                          id={states.renameId}
+                          value={states.renameName}
                           onChange={(event) =>
-                            setRenameName(event.target.value)
+                            updateSuperState({ renameName: event.target.value })
                           }
                           onKeyPress={(event) => handleKeyPress(event.key)}
                           onBlur={rename}
                         ></RenamingList>
                       )}
-                      {renameId !== list.listid && (
+                      {states.renameId !== list.listid && (
                         <ContextMenuTrigger
                           key={list.listid}
                           id={list.listid.toString()}
@@ -390,11 +444,11 @@ const App = () => {
                           </ListContextMenu>
                         </ContextMenuTrigger>
                       )}
-                    </>
+                    </React.Fragment>
                   ))}
                 <AddButton
                   onClick={() => {
-                    setAddingList(true);
+                    updateSuperState({ addingList: true });
                   }}
                 >
                   <AddButtonIcon
@@ -405,13 +459,15 @@ const App = () => {
                 </AddButton>
               </Information>
             )}
-            {addingList && (
+            {states.addingList && (
               <Information>
                 <InputAndTextContainer>
                   <Text>List name:</Text>
                   <Input
-                    value={newListName}
-                    onChange={(event) => setNewListName(event.target.value)}
+                    value={states.newListName}
+                    onChange={(event) =>
+                      updateSuperState({ newListName: event.target.value })
+                    }
                   ></Input>
                   <Button
                     onClick={() => {
