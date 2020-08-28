@@ -20,7 +20,7 @@ const None = ({ updateSuperState }) => {
             updateSuperState({ currentState: "registering" });
           }}
         >
-          register
+          create account
         </Button>
       </Information>
     </div>

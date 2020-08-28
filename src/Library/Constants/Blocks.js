@@ -1,13 +1,11 @@
 import styled from "styled-components";
-import Color from "./Color"
+import Color from "./Color";
 
 export const Information = styled.div`
   display: flex;
   flex-direction: column;
   background-color: ${Color.background};
   margin: 0.5em 0;
-  width: 16em;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   padding: 1em;
 `;
 
@@ -16,20 +14,23 @@ export const InputAndTextContainer = styled.div`
 `;
 
 export const Input = styled.input`
-  color: ${Color.text};
-  display: flex;
-  border-width: 1px;
-  padding: 0.5em;
-  border-radius: 5px;
-  font-size: 1em;
-  width: 15em;
-  background-color: ${Color.background2};
-  ${({ failed }) =>
-    failed &&
-    `
-  border-bottom-width: 2px;
-  border-bottom-color: ${Color.error};
-  `}
+  max-width: 20em;
+  width: 100%;
+  height: 3.5em;
+  padding: 18px 18px;
+  display: block;
+  border: 0px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #5f6670;
+  font-family: Rubik;
+  background-color: #f7f7f9;
+  text-align: center;
+  font-size: 1.2em;
+  resize: none;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
 `;
 
 export const Text = styled.div`
@@ -47,16 +48,15 @@ export const Button = styled.button`
   text-align: center;
   background-color: ${Color.primary};
   color: #ffffff;
-  font-family: "Open Sans", sans-serif;
-  font-style: normal;
-  font-size: 1.5em;
-  margin: 0.25em 0;
-  padding: 0.5em;
+  font-family: "Rubik", sans-serif;
+  font-weight: 400;
+  font-size: 1.1375rem;
+  margin-top: 9px;
+  padding: 18px;
   border: none;
-  border-radius: 3px;
+  border-radius: 2.25rem;
   :focus {
     background-color: ${Color.primary2};
-    outline: none;
   }
   :hover {
     background-color: ${Color.primary2};

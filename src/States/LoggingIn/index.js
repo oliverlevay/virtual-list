@@ -20,8 +20,8 @@ const LoggingIn = ({
     <div>
       <Information>
         <InputAndTextContainer>
-          <Text>email/username:</Text>
           <Input
+            placeholder="username/email"
             value={states.username}
             failed={states.usernameFailed}
             autoComplete="username"
@@ -31,8 +31,8 @@ const LoggingIn = ({
           ></Input>
         </InputAndTextContainer>
         <InputAndTextContainer>
-          <Text>password:</Text>
           <Input
+            placeholder="password"
             type="password"
             value={states.password}
             failed={states.passwordFailed}
@@ -49,7 +49,7 @@ const LoggingIn = ({
         <Button
           onClick={() => {
             updateSuperState({
-              setCurrentState: State.none,
+              currentState: State.none,
               username: "",
               password: "",
               usernameFailed: false,
